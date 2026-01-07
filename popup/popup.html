@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Form Filler</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="container">
+    <!-- 头部 -->
+    <header class="header">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <path
+            d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5C15 6.10457 14.1046 7 13 7H11C9.89543 7 9 6.10457 9 5Z"
+            stroke="currentColor" stroke-width="2" />
+          <path d="M9 12H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <path d="M9 16H13" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        <h1>Quick Form Filler</h1>
+      </div>
+    </header>
+
+    <!-- 主视图 - 项目列表 -->
+    <div id="mainView" class="view active">
+      <div class="view-header">
+        <h2>我的项目</h2>
+        <button id="createProjectBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          新建项目
+        </button>
+      </div>
+
+      <div id="projectList" class="project-list">
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V9C21 7.89543 20.1046 7 19 7H13L11 5H5C3.89543 5 3 5.89543 3 7Z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <p>暂无项目</p>
+          <span>点击"新建项目"开始创建</span>
+        </div>
+      </div>
+
+      <!-- 导入按钮 -->
+      <div class="import-export-actions">
+        <button id="importProjectBtn" class="btn btn-secondary btn-sm btn-full">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" />
+            <path d="M12 3V15M12 15L7 10M12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+          导入项目 (支持多选)
+        </button>
+      </div>
+      <input type="file" id="importFileInput" accept=".json" multiple style="display:none">
+    </div>
+
+    <!-- 创建项目视图 -->
+    <div id="createView" class="view">
+      <div class="view-header">
+        <button class="btn-back" id="backFromCreate">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <h2>新建项目</h2>
+      </div>
+
+      <div class="form-group">
+        <label for="projectName">项目名称</label>
+        <input type="text" id="projectName" placeholder="输入项目名称...">
+      </div>
+
+      <div class="form-group">
+        <label for="projectDesc">项目描述 (可选)</label>
+        <textarea id="projectDesc" placeholder="输入项目描述..." rows="3"></textarea>
+      </div>
+
+      <button id="saveProjectBtn" class="btn btn-primary btn-full">
+        创建项目
+      </button>
+    </div>
+
+    <!-- 项目详情视图 -->
+    <div id="projectView" class="view">
+      <div class="view-header">
+        <button class="btn-back" id="backFromProject">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <h2 id="projectTitle">项目详情</h2>
+        <button id="exportProjectBtn" class="btn-icon" title="导出项目">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 15V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V15" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" />
+            <path d="M12 15V3M12 3L7 8M12 3L17 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button id="editProjectBtn" class="btn-icon" title="编辑项目">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <button id="deleteProjectBtn" class="btn-icon btn-danger" title="删除项目">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 6H5H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path
+              d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="project-actions">
+        <button id="startMarkingBtn" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+          </svg>
+          标记元素
+        </button>
+        <button id="runProjectBtn" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 3L19 12L5 21V3Z" fill="currentColor" />
+          </svg>
+          运行项目
+        </button>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h3>已标记的元素 <span id="elementCount">(0)</span></h3>
+          <span class="drag-hint">拖拽调整顺序</span>
+        </div>
+        <div id="elementList" class="element-list">
+          <div class="empty-state small">
+            <p>暂无标记元素</p>
+            <span>点击"标记元素"开始标记</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 编辑项目视图 -->
+    <div id="editProjectView" class="view">
+      <div class="view-header">
+        <button class="btn-back" id="backFromEditProject">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <h2>编辑项目</h2>
+      </div>
+
+      <div class="form-group">
+        <label for="editProjectName">项目名称</label>
+        <input type="text" id="editProjectName" placeholder="输入项目名称...">
+      </div>
+
+      <div class="form-group">
+        <label for="editProjectDesc">项目描述 (可选)</label>
+        <textarea id="editProjectDesc" placeholder="输入项目描述..." rows="3"></textarea>
+      </div>
+
+      <button id="updateProjectBtn" class="btn btn-primary btn-full">
+        保存修改
+      </button>
+    </div>
+
+    <!-- 编辑元素视图 -->
+    <div id="editElementView" class="view">
+      <div class="view-header">
+        <button class="btn-back" id="backFromEditElement">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <h2>编辑元素</h2>
+      </div>
+
+      <div class="form-group">
+        <label for="editElementName">元素名称</label>
+        <input type="text" id="editElementName" placeholder="输入元素名称...">
+      </div>
+
+      <div class="form-group">
+        <label>元素选择器</label>
+        <div class="selector-display" id="editElementSelector"></div>
+      </div>
+
+      <button id="updateElementBtn" class="btn btn-primary btn-full">
+        保存修改
+      </button>
+    </div>
+
+    <!-- 运行项目视图 -->
+    <div id="runView" class="view">
+      <div class="view-header">
+        <button class="btn-back" id="backFromRun">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <h2>运行项目</h2>
+      </div>
+
+      <div class="section">
+        <h3>填写数据</h3>
+        <p class="hint">使用制表符(Tab)分隔各列数据，列顺序需与元素顺序一致</p>
+
+        <div class="field-order" id="fieldOrder">
+          <!-- 动态生成字段顺序 -->
+        </div>
+
+        <div class="form-group">
+          <label for="dataInput">粘贴数据</label>
+          <textarea id="dataInput" placeholder="在此粘贴制表符分隔的数据..." rows="4"></textarea>
+        </div>
+
+        <div id="dataPreview" class="data-preview hidden">
+          <h4>数据预览</h4>
+          <div id="previewContent"></div>
+        </div>
+      </div>
+
+      <button id="executeBtn" class="btn btn-primary btn-full">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 3L19 12L5 21V3Z" fill="currentColor" />
+        </svg>
+        开始填写
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
