@@ -80,6 +80,59 @@ function setupEventListeners() {
   });
   document.getElementById('importFileInput').addEventListener('change', handleImport);
   document.getElementById('exportProjectBtn').addEventListener('click', exportCurrentProject);
+
+  // Tab navigation
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // Tool items expand/collapse
+  document.querySelectorAll('.tool-item-header:not(.disabled)').forEach(header => {
+    header.addEventListener('click', () => {
+      const toolItem = header.closest('.tool-item');
+      toolItem.classList.toggle('expanded');
+    });
+  });
+
+  // Batch click tool
+  document.getElementById('batchClickBtn').addEventListener('click', startBatchClickMode);
+}
+
+// ===== Tab Navigation =====
+function switchTab(tabName) {
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tabName);
+  });
+
+  // Update tab panes
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    pane.classList.remove('active');
+  });
+  document.getElementById(`${tabName}Tab`).classList.add('active');
+
+  // Reset views when switching to projects tab
+  if (tabName === 'projects') {
+    showView('main');
+    currentProject = null;
+  }
+}
+
+// ===== Batch Click Tool =====
+async function startBatchClickMode() {
+  try {
+    const delay = parseInt(document.getElementById('clickDelay').value) || 100;
+    const scrollIntoView = document.getElementById('scrollIntoView').checked;
+
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.tabs.sendMessage(tab.id, {
+      action: 'startBatchClickSelection',
+      options: { delay, scrollIntoView }
+    });
+    window.close();
+  } catch (error) {
+    showToast('无法启动批量点击模式，请刷新页面重试', 'error');
+  }
 }
 
 // ===== Project Management =====

@@ -702,3 +702,285 @@ body {
   border-color: var(--danger);
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, var(--bg-secondary) 100%);
 }
+
+/* ===== Tab Navigation ===== */
+.tab-nav {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  justify-content: center;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.tab-btn.active {
+  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.tab-btn.active svg {
+  color: white;
+}
+
+.tab-btn svg {
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.tab-btn:hover svg {
+  color: var(--text-primary);
+}
+
+/* ===== Tab Content ===== */
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tab-pane {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.tab-pane.active {
+  display: flex;
+}
+
+/* ===== Tools Container ===== */
+.tools-container {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== Tool List ===== */
+.tool-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== Tool Item (Collapsible) ===== */
+.tool-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.tool-item:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.tool-item.expanded {
+  border-color: var(--primary);
+}
+
+.tool-item-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.tool-item-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tool-item-header.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.tool-item-header.disabled:hover {
+  background: transparent;
+}
+
+.tool-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.tool-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-item-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+}
+
+.tool-item-info p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-item-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--text-muted);
+  transition: transform var(--transition-fast);
+}
+
+.tool-item.expanded .tool-item-toggle {
+  transform: rotate(180deg);
+}
+
+/* Tool Item Body (Expandable content) */
+.tool-item-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border-color);
+  animation: slideDown 0.2s ease;
+}
+
+.tool-item.expanded .tool-item-body {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tool-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+/* Tool Settings Inline */
+.tool-settings-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.setting-row>label:first-child {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.setting-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.setting-input input[type="number"] {
+  width: 80px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  outline: none;
+  text-align: center;
+}
+
+.setting-input input[type="number"]:focus {
+  border-color: var(--primary);
+}
+
+.setting-unit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Coming Soon Tool */
+.tool-coming-soon {
+  opacity: 0.6;
+}
+
+.tool-coming-soon .tool-item-icon {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-muted);
+}
+
+/* ===== Checkbox Label ===== */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  user-select: none;
+}

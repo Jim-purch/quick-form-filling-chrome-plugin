@@ -207,3 +207,192 @@
     border: 1px solid rgba(239, 68, 68, 0.4);
     color: #ef4444;
 }
+
+/* ===== Batch Click Mode ===== */
+#qff-batch-click-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2147483647;
+    pointer-events: none;
+}
+
+.qff-batch-click-bar {
+    border-bottom: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+
+.qff-batch-click-bar .qff-marking-text {
+    color: #22c55e;
+}
+
+#qff-batch-click-tooltip {
+    position: fixed;
+    z-index: 2147483646;
+    padding: 10px 14px;
+    background: #1e293b;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    color: #94a3b8;
+    font-family: 'Monaco', 'Consolas', monospace;
+    font-size: 12px;
+    line-height: 1.5;
+    max-width: 280px;
+    pointer-events: none;
+}
+
+#qff-batch-click-tooltip br+* {
+    color: #22c55e;
+    font-weight: 500;
+}
+
+/* Batch Click Confirmation Dialog */
+#qff-batch-click-confirm {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2147483647;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.qff-batch-confirm-content {
+    width: 320px;
+    padding: 24px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    text-align: center;
+}
+
+.qff-batch-confirm-content h3 {
+    margin: 0 0 16px 0;
+    color: #f8fafc;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.qff-batch-confirm-count {
+    margin: 0 0 8px 0;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+.qff-batch-confirm-count strong {
+    color: #22c55e;
+    font-size: 20px;
+}
+
+.qff-batch-confirm-hint {
+    margin: 0 0 20px 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.qff-batch-confirm-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.qff-btn-start {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.qff-btn-start:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+}
+
+/* Batch Click Progress UI */
+#qff-batch-click-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2147483647;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.qff-progress-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.qff-progress-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.qff-progress-text {
+    color: #f8fafc;
+    font-size: 14px;
+    font-weight: 500;
+    min-width: 140px;
+}
+
+.qff-progress-text span {
+    color: #22c55e;
+}
+
+.qff-progress-bar {
+    width: 200px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.qff-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+    border-radius: 3px;
+    transition: width 0.2s ease;
+}
+
+.qff-btn-stop {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 6px;
+    color: #ef4444;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.qff-btn-stop:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: #ef4444;
+}

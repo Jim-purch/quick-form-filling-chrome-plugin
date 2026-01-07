@@ -7,6 +7,12 @@ let markingOverlay = null;
 let markingTooltip = null;
 let nameDialog = null;
 
+// Batch click mode variables
+let isBatchClickMode = false;
+let batchClickOptions = { delay: 100, scrollIntoView: true };
+let batchClickOverlay = null;
+let batchClickTooltip = null;
+
 // ===== Message Listener =====
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'startMarking') {
@@ -14,6 +20,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ success: true });
     } else if (message.action === 'executeFill') {
         executeFill(message.elements, message.values);
+        sendResponse({ success: true });
+    } else if (message.action === 'startBatchClickSelection') {
+        startBatchClickMode(message.options);
         sendResponse({ success: true });
     }
     return true;
@@ -468,4 +477,394 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// ===== Batch Click Mode =====
+function startBatchClickMode(options = {}) {
+    if (isBatchClickMode) return;
+
+    isBatchClickMode = true;
+    batchClickOptions = { ...batchClickOptions, ...options };
+
+    createBatchClickUI();
+    document.addEventListener('mouseover', handleBatchClickMouseOver, true);
+    document.addEventListener('mouseout', handleBatchClickMouseOut, true);
+    document.addEventListener('click', handleBatchClickClick, true);
+    document.addEventListener('keydown', handleBatchClickKeyDown, true);
+}
+
+function stopBatchClickMode() {
+    isBatchClickMode = false;
+
+    removeBatchClickUI();
+    document.removeEventListener('mouseover', handleBatchClickMouseOver, true);
+    document.removeEventListener('mouseout', handleBatchClickMouseOut, true);
+    document.removeEventListener('click', handleBatchClickClick, true);
+    document.removeEventListener('keydown', handleBatchClickKeyDown, true);
+
+    if (highlightedElement) {
+        highlightedElement.style.outline = '';
+        highlightedElement = null;
+    }
+}
+
+function createBatchClickUI() {
+    // Create overlay
+    batchClickOverlay = document.createElement('div');
+    batchClickOverlay.id = 'qff-batch-click-overlay';
+    batchClickOverlay.innerHTML = `
+    <div class="qff-marking-bar qff-batch-click-bar">
+      <span class="qff-marking-icon">🎯</span>
+      <span class="qff-marking-text">批量点击模式 - 点击要批量点击的元素</span>
+      <button class="qff-marking-exit">退出 (ESC)</button>
+    </div>
+  `;
+    document.body.appendChild(batchClickOverlay);
+
+    batchClickOverlay.querySelector('.qff-marking-exit').addEventListener('click', stopBatchClickMode);
+
+    // Create tooltip
+    batchClickTooltip = document.createElement('div');
+    batchClickTooltip.id = 'qff-batch-click-tooltip';
+    batchClickTooltip.className = 'qff-marking-tooltip';
+    batchClickTooltip.style.display = 'none';
+    document.body.appendChild(batchClickTooltip);
+}
+
+function removeBatchClickUI() {
+    if (batchClickOverlay) {
+        batchClickOverlay.remove();
+        batchClickOverlay = null;
+    }
+    if (batchClickTooltip) {
+        batchClickTooltip.remove();
+        batchClickTooltip = null;
+    }
+}
+
+function handleBatchClickMouseOver(e) {
+    if (!isBatchClickMode) return;
+
+    const target = e.target;
+    if (!isBatchClickOurElement(target)) {
+        if (highlightedElement) {
+            highlightedElement.style.outline = '';
+        }
+        highlightedElement = target;
+        target.style.outline = '2px solid #22c55e';
+        target.style.outlineOffset = '2px';
+
+        updateBatchClickTooltip(target, e);
+    }
+}
+
+function handleBatchClickMouseOut(e) {
+    if (!isBatchClickMode) return;
+
+    const target = e.target;
+    if (target === highlightedElement) {
+        target.style.outline = '';
+        highlightedElement = null;
+        if (batchClickTooltip) batchClickTooltip.style.display = 'none';
+    }
+}
+
+function handleBatchClickClick(e) {
+    if (!isBatchClickMode) return;
+    if (isBatchClickOurElement(e.target)) return;
+
+    if (highlightedElement) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Get similar elements
+        const similarElements = findSimilarElements(highlightedElement);
+        if (similarElements.length > 0) {
+            // Show confirmation dialog instead of immediately clicking
+            showBatchClickConfirmDialog(similarElements);
+        } else {
+            showNotification('未找到相同的元素', true);
+        }
+    }
+}
+
+function handleBatchClickKeyDown(e) {
+    if (e.key === 'Escape') {
+        if (batchClickConfirmDialog) {
+            closeBatchClickConfirmDialog();
+        } else {
+            stopBatchClickMode();
+        }
+    }
+}
+
+function isBatchClickOurElement(el) {
+    return el.closest('#qff-batch-click-overlay') ||
+        el.closest('#qff-batch-click-tooltip') ||
+        el.closest('#qff-batch-click-confirm') ||
+        el.closest('#qff-batch-click-progress') ||
+        el.closest('#qff-marking-overlay') ||
+        el.closest('#qff-notification');
+}
+
+function updateBatchClickTooltip(element, event) {
+    if (!batchClickTooltip) return;
+
+    const tagName = element.tagName.toLowerCase();
+    const className = element.className && typeof element.className === 'string'
+        ? element.className.trim().split(/\s+/).slice(0, 3).join('.')
+        : '';
+
+    // Count similar elements
+    const similarCount = findSimilarElements(element).length;
+
+    let info = `<${tagName}`;
+    if (className) info += `.${className}`;
+    info += `>`;
+    info += `\n找到 ${similarCount} 个相同元素`;
+
+    batchClickTooltip.innerHTML = escapeHtml(info).replace('\n', '<br>');
+    batchClickTooltip.style.display = 'block';
+
+    const x = Math.min(event.clientX + 15, window.innerWidth - 200);
+    const y = Math.min(event.clientY + 15, window.innerHeight - 60);
+
+    batchClickTooltip.style.left = x + 'px';
+    batchClickTooltip.style.top = y + 'px';
+}
+
+function findSimilarElements(element) {
+    const tagName = element.tagName.toLowerCase();
+    const classList = element.classList;
+
+    // Build a selector based on tag and all classes
+    let selector = tagName;
+    if (classList && classList.length > 0) {
+        // Use all classes for more accurate matching
+        selector += Array.from(classList).map(c => `.${CSS.escape(c)}`).join('');
+    }
+
+    try {
+        const elements = document.querySelectorAll(selector);
+        // Filter out our UI elements
+        return Array.from(elements).filter(el => !isBatchClickOurElement(el));
+    } catch (e) {
+        console.error('Selector error:', e);
+        return [element];
+    }
+}
+
+// Batch Click Confirmation Dialog
+let batchClickConfirmDialog = null;
+let pendingBatchClickElements = [];
+
+function showBatchClickConfirmDialog(elements) {
+    pendingBatchClickElements = elements;
+
+    // Hide tooltip
+    if (batchClickTooltip) batchClickTooltip.style.display = 'none';
+
+    // Create confirmation dialog
+    batchClickConfirmDialog = document.createElement('div');
+    batchClickConfirmDialog.id = 'qff-batch-click-confirm';
+    batchClickConfirmDialog.innerHTML = `
+        <div class="qff-batch-confirm-content">
+            <h3>批量点击确认</h3>
+            <p class="qff-batch-confirm-count">找到 <strong>${elements.length}</strong> 个相同元素</p>
+            <p class="qff-batch-confirm-hint">点击"开始点击"将依次点击所有元素</p>
+            <div class="qff-batch-confirm-buttons">
+                <button class="qff-btn-cancel" id="qff-batch-cancel">取消</button>
+                <button class="qff-btn-start" id="qff-batch-start">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 3L19 12L5 21V3Z" fill="currentColor"/>
+                    </svg>
+                    开始点击
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(batchClickConfirmDialog);
+
+    // Highlight all elements that will be clicked
+    elements.forEach(el => {
+        el.style.outline = '2px dashed #22c55e';
+        el.style.outlineOffset = '2px';
+    });
+
+    // Add event listeners
+    document.getElementById('qff-batch-cancel').addEventListener('click', () => {
+        closeBatchClickConfirmDialog();
+    });
+
+    document.getElementById('qff-batch-start').addEventListener('click', () => {
+        const elementsToClick = [...pendingBatchClickElements];
+        closeBatchClickConfirmDialog();
+        stopBatchClickMode();
+        executeBatchClick(elementsToClick);
+    });
+}
+
+function closeBatchClickConfirmDialog() {
+    // Remove highlight from elements
+    pendingBatchClickElements.forEach(el => {
+        el.style.outline = '';
+        el.style.outlineOffset = '';
+    });
+    pendingBatchClickElements = [];
+
+    if (batchClickConfirmDialog) {
+        batchClickConfirmDialog.remove();
+        batchClickConfirmDialog = null;
+    }
+}
+
+// Batch Click Execution with Stop functionality
+let batchClickAbortController = null;
+let batchClickProgressUI = null;
+
+async function executeBatchClick(elements) {
+    const delay = batchClickOptions.delay || 100;
+    const scrollIntoView = batchClickOptions.scrollIntoView !== false;
+    let clickedCount = 0;
+
+    // Create abort controller
+    batchClickAbortController = { aborted: false };
+
+    // Create progress UI
+    createBatchClickProgressUI(elements.length);
+
+    for (let i = 0; i < elements.length; i++) {
+        // Check if aborted
+        if (batchClickAbortController.aborted) {
+            showNotification(`已停止！点击了 ${clickedCount} 个元素`, false);
+            removeBatchClickProgressUI();
+            return;
+        }
+
+        const el = elements[i];
+
+        // Update progress
+        updateBatchClickProgress(i + 1, elements.length);
+
+        try {
+            // Check if element is still in DOM
+            if (!document.contains(el)) {
+                continue;
+            }
+
+            // Scroll into view if enabled
+            if (scrollIntoView) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            // Highlight element before clicking
+            const originalOutline = el.style.outline;
+            const originalOutlineOffset = el.style.outlineOffset;
+            el.style.outline = '3px solid #22c55e';
+            el.style.outlineOffset = '2px';
+
+            // Simulate real click with mouse events
+            simulateClick(el);
+            clickedCount++;
+
+            // Remove highlight after a short delay
+            setTimeout(() => {
+                if (document.contains(el)) {
+                    el.style.outline = originalOutline;
+                    el.style.outlineOffset = originalOutlineOffset;
+                }
+            }, 300);
+
+            // Wait for delay between clicks
+            if (i < elements.length - 1 && delay > 0) {
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        } catch (error) {
+            console.error('Error clicking element:', error);
+        }
+    }
+
+    removeBatchClickProgressUI();
+    showNotification(`已完成！成功点击了 ${clickedCount} 个元素`, false);
+}
+
+function simulateClick(element) {
+    // Get element position for realistic mouse events
+    const rect = element.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+
+    const eventOptions = {
+        bubbles: true,
+        cancelable: true,
+        view: window,
+        clientX: x,
+        clientY: y,
+        screenX: x + window.screenX,
+        screenY: y + window.screenY,
+        button: 0,
+        buttons: 1
+    };
+
+    // Dispatch mouse events in sequence
+    element.dispatchEvent(new MouseEvent('mouseenter', eventOptions));
+    element.dispatchEvent(new MouseEvent('mouseover', eventOptions));
+    element.dispatchEvent(new MouseEvent('mousedown', eventOptions));
+    element.dispatchEvent(new MouseEvent('mouseup', eventOptions));
+    element.dispatchEvent(new MouseEvent('click', eventOptions));
+
+    // Also try the native click for good measure
+    if (typeof element.click === 'function') {
+        element.click();
+    }
+
+    // For some elements, focus and trigger events
+    if (element.focus) {
+        element.focus();
+    }
+}
+
+function createBatchClickProgressUI(total) {
+    batchClickProgressUI = document.createElement('div');
+    batchClickProgressUI.id = 'qff-batch-click-progress';
+    batchClickProgressUI.innerHTML = `
+        <div class="qff-progress-content">
+            <div class="qff-progress-info">
+                <span class="qff-progress-text">正在点击: <span id="qff-progress-current">0</span> / ${total}</span>
+                <div class="qff-progress-bar">
+                    <div class="qff-progress-fill" id="qff-progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+            <button class="qff-btn-stop" id="qff-batch-stop">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                    <rect x="6" y="6" width="12" height="12" fill="currentColor"/>
+                </svg>
+                停止
+            </button>
+        </div>
+    `;
+    document.body.appendChild(batchClickProgressUI);
+
+    document.getElementById('qff-batch-stop').addEventListener('click', () => {
+        if (batchClickAbortController) {
+            batchClickAbortController.aborted = true;
+        }
+    });
+}
+
+function updateBatchClickProgress(current, total) {
+    const currentEl = document.getElementById('qff-progress-current');
+    const fillEl = document.getElementById('qff-progress-fill');
+
+    if (currentEl) currentEl.textContent = current;
+    if (fillEl) fillEl.style.width = `${(current / total) * 100}%`;
+}
+
+function removeBatchClickProgressUI() {
+    if (batchClickProgressUI) {
+        batchClickProgressUI.remove();
+        batchClickProgressUI = null;
+    }
+    batchClickAbortController = null;
 }

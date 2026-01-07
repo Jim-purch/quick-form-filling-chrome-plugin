@@ -19,6 +19,7 @@
 - 🎯 **项目管理** - 创建和管理多个填表项目
 - ✨ **元素标记** - 可视化标记网页上的表单元素
 - 📝 **批量填写** - 使用制表符分隔的数据一次性填写多个字段
+- 🔧 **批量点击** - 选择元素后自动点击所有相同元素，便于展开/收起列表
 - 💾 **本地存储** - 项目数据保存在本地，安全可靠
 - 🎨 **现代UI** - 暗色主题，美观易用
 
@@ -59,6 +60,15 @@
 5. 预览数据确认无误后，点击"开始填写"
 6. 扩展会自动逐个填写每个元素
 
+#### 5. 使用批量点击工具
+
+1. 点击扩展图标打开弹出窗口
+2. 切换到"工具"标签页
+3. 点击"开始选择"按钮进入批量点击模式
+4. 在页面上选择一个目标元素（例如展开按钮）
+5. 点击该元素后，扩展会自动找到所有相同的元素并依次点击
+6. 可在设置中调整点击间隔和是否滚动到可见区域
+
 ### 支持的元素类型
 
 - ✅ 文本输入框 (`input[type="text"]`)
@@ -94,6 +104,7 @@
 - 🎯 **Project Management** - Create and manage multiple form filling projects
 - ✨ **Element Marking** - Visually mark form elements on web pages
 - 📝 **Batch Filling** - Fill multiple fields at once using tab-separated data
+- 🔧 **Batch Click** - Select an element and auto-click all similar elements, useful for expanding/collapsing lists
 - 💾 **Local Storage** - Project data is stored locally for security
 - 🎨 **Modern UI** - Dark theme with beautiful and intuitive design
 
@@ -133,6 +144,15 @@
 4. Paste the data into the input field
 5. Preview the data and click "Start Filling"
 6. The extension will automatically fill each element
+
+#### 5. Using Batch Click Tool
+
+1. Click the extension icon to open the popup
+2. Switch to the "Tools" tab
+3. Click "Start Selection" button to enter batch click mode
+4. Select a target element on the page (e.g., an expand button)
+5. After clicking the element, the extension will find and click all similar elements
+6. You can adjust click delay and scroll options in the settings
 
 ### Supported Element Types
 
