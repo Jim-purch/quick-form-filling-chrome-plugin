@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Quick Form Filler",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "快速表单填写助手 - 创建项目、标记元素、批量填写",
   "permissions": [
     "activeTab",
